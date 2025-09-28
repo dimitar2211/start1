@@ -13,5 +13,7 @@ namespace start1.Data
         }
 
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<JournalPage> JournalPages { get; set; }
+
     }
 }

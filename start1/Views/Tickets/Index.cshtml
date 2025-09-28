@@ -35,7 +35,11 @@
                         <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-detail">Детайли</a>
                         <a asp-action="Edit" asp-route-id="@ticket.Id" class="btn btn-edit">Редактирай</a>
                         <a asp-action="Delete" asp-route-id="@ticket.Id" class="btn btn-delete">Изтрий</a>
+
+                        <!-- 📝 Нов бутон за отваряне/създаване на дневник -->
+                        <a asp-controller="Journal" asp-action="Page" asp-route-ticketId="@ticket.Id" asp-route-page="1" class="btn btn-journal">Дневник</a>
                     </div>
+
                 </div>
             </div>
         }

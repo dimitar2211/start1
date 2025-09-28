@@ -21,10 +21,12 @@
             <div class="serial-number">ID: @Model.Id</div>
             <div class="actions">
                 <a asp-action="Index" class="btn btn-detail">Обратно</a>
+                <a class="btn btn-info" href="@Url.Action("Page", "Journal", new { ticketId = Model.Id, readOnly = true })">📝 Прегледай дневник</a>
             </div>
         </div>
     </div>
 </div>
+
 
 <style>
     body {
