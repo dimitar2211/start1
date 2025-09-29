@@ -8,15 +8,14 @@
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ececec; /* променено от #f7f9fc */
+        background-color: #ececec;
         color: #222;
         margin: 0;
     }
 
     .container {
-        padding-top: 40px; /* добавя разстояние вътре в контейнера, за да не е прилепнало съдържанието към navbar */
+        padding-top: 40px;
     }
-
 
     h2 {
         text-align: center;
@@ -183,6 +182,7 @@
 
 @section Scripts {
     <script>
+        const isReadOnly = @readOnly.ToString().ToLower(); // 🔐 Булева стойност от Razor
         const editor = document.getElementById('editor');
         let draggedWrapper = null;
         let offsetX = 0;
@@ -226,7 +226,7 @@
             draggedWrapper = null;
         });
 
-        // Качване на снимка, само ако не e readOnly
+        // Качване на снимка (само ако не е readOnly)
         const fileInput = document.getElementById('imageUpload');
         if (fileInput) {
             fileInput.addEventListener('change', function () {
@@ -272,9 +272,17 @@
             this.appendChild(hiddenContentInput);
         });
 
+        // 🔒 Блокиране на drag, ако сме в readOnly
         window.onload = () => {
             const wrappers = editor.querySelectorAll('.resizable-wrapper');
-            wrappers.forEach(makeDraggable);
+
+            if (!isReadOnly) {
+                wrappers.forEach(makeDraggable);
+            } else {
+                wrappers.forEach(wrapper => {
+                    wrapper.style.pointerEvents = 'none'; // Блокира drag/resize
+                });
+            }
         };
     </script>
 }
