@@ -38,14 +38,17 @@ namespace start1.Controllers
             if (id == null)
                 return NotFound();
 
-            var ticket = await _context.Tickets
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(m => m.Id == id);
+            if (ticket == null)
+                return NotFound();
 
-            if (ticket == null || ticket.UserId != _userManager.GetUserId(User))
+            var currentUserId = _userManager.GetUserId(User);
+            if (!ticket.IsPublic && ticket.UserId != currentUserId)
                 return NotFound();
 
             return View(ticket);
         }
+
 
         // GET: Tickets/Create
         public IActionResult Create()
@@ -110,13 +113,12 @@ namespace start1.Controllers
         // POST: Tickets/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,From,To,DepartureTime,NumberOfPassengers")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,From,To,DepartureTime,NumberOfPassengers,IsPublic")] Ticket ticket)
         {
             if (id != ticket.Id)
                 return NotFound();
 
             var existingTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
-
             if (existingTicket == null || existingTicket.UserId != _userManager.GetUserId(User))
                 return NotFound();
 
@@ -124,7 +126,7 @@ namespace start1.Controllers
             {
                 try
                 {
-                    ticket.UserId = existingTicket.UserId; // За да не се изгуби UserId
+                    ticket.UserId = existingTicket.UserId; // Запазваме UserId
                     _context.Update(ticket);
                     await _context.SaveChangesAsync();
                 }
@@ -139,6 +141,7 @@ namespace start1.Controllers
             }
             return View(ticket);
         }
+
 
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -168,6 +171,17 @@ namespace start1.Controllers
             _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> PublicTickets()
+        {
+            var publicTickets = await _context.Tickets
+                .Where(t => t.IsPublic)
+                .Include(t => t.User)
+                .ToListAsync();
+
+            return View(publicTickets);
         }
 
         private bool TicketExists(int id)

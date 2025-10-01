@@ -21,5 +21,8 @@ namespace start1.Models
 
         [ForeignKey("TicketId")]
         public virtual Ticket Ticket { get; set; }
+
+        [NotMapped]
+        public bool HasNextPage { get; set; }
     }
 }

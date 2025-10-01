@@ -9,6 +9,8 @@
 
     <div class="new-ticket">
         <a asp-action="Create" class="btn-create">+ Нов билет</a>
+        <a asp-controller="Tickets" asp-action="PublicTickets" class="btn btn-primary">Публични билети</a>
+
     </div>
 
     @if (!Model.Any())

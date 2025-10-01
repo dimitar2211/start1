@@ -5,6 +5,14 @@
     bool readOnly = ViewBag.ReadOnly == true;
 }
 
+@if (readOnly && string.IsNullOrWhiteSpace(Model.Content))
+{
+    <div class="alert alert-info text-center" role="alert">
+        📭 Този билет все още няма създаден дневник.
+    </div>
+}
+
+
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -138,7 +146,6 @@
     <input type="hidden" asp-for="TicketId" />
     <input type="hidden" asp-for="PageNumber" />
 
-    @* Toolbar само ако не е readOnly *@
     @if (!readOnly)
     {
         <div class="toolbar mb-3">
@@ -172,12 +179,17 @@
     }
 </form>
 
-<div class="mt-4">
+<div class="mt-4 navigation">
     @if (Model.PageNumber > 1)
     {
         <a class="btn btn-secondary" href="@Url.Action("Page", "Journal", new { ticketId = Model.TicketId, page = Model.PageNumber - 1, readOnly = readOnly })">⬅ Предишна</a>
     }
-    <a class="btn btn-secondary" href="@Url.Action("Page", "Journal", new { ticketId = Model.TicketId, page = Model.PageNumber + 1, readOnly = readOnly })">Следваща ➡</a>
+
+    @* Покажи бутона Следваща само ако има следваща страница *@
+    @if (Model.HasNextPage)
+    {
+        <a class="btn btn-secondary" href="@Url.Action("Page", "Journal", new { ticketId = Model.TicketId, page = Model.PageNumber + 1, readOnly = readOnly })">Следваща ➡</a>
+    }
 </div>
 
 @section Scripts {

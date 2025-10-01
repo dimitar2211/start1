@@ -21,13 +21,19 @@ namespace start1.Controllers
         // 📖 GET: /Journal/Page?ticketId=5&page=1
         public async Task<IActionResult> Page(int ticketId, int page = 1, bool readOnly = false)
         {
-            var ticket = await _context.Tickets
-                .FirstOrDefaultAsync(t => t.Id == ticketId);
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null)
+                return NotFound();
 
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            if (ticket == null || ticket.UserId != currentUserId)
+            // Ако билетът е частен и не си собственик, връщаме 404
+            if (!ticket.IsPublic && ticket.UserId != currentUserId)
                 return NotFound();
+
+            // Ако е public и readOnly е false, да не се позволява редакция от други потребители
+            if (ticket.IsPublic && readOnly == false && ticket.UserId != currentUserId)
+                return Forbid();
 
             var journalPage = await _context.JournalPages
                 .FirstOrDefaultAsync(p => p.TicketId == ticketId && p.PageNumber == page);
@@ -42,22 +48,35 @@ namespace start1.Controllers
                         PageNumber = page,
                         Content = ""
                     };
-
                     _context.JournalPages.Add(journalPage);
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    // В режим за четене, ако няма такава страница, просто връщаме 404 или празна
-                    return NotFound();
+                    // Показваме съобщение вместо грешка
+                    ViewBag.NoJournalMessage = "📭 Този билет все още няма създаден дневник.";
+                    journalPage = new JournalPage
+                    {
+                        TicketId = ticketId,
+                        PageNumber = page,
+                        Content = ""
+                    };
                 }
             }
+
+            // 🔍 Проверка дали следващата страница съществува И не е празна
+            var nextPage = await _context.JournalPages
+                .FirstOrDefaultAsync(p => p.TicketId == ticketId && p.PageNumber == page + 1);
+
+            var hasNextPage = nextPage != null && !string.IsNullOrWhiteSpace(nextPage.Content);
+            journalPage.HasNextPage = hasNextPage;
 
             ViewBag.TicketId = ticketId;
             ViewBag.ReadOnly = readOnly;
 
             return View(journalPage);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile image)

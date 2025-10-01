@@ -30,6 +30,8 @@ namespace start1.Models
 
         public virtual IdentityUser? User { get; set; }
 
+        [Display(Name = "Публичен билет")]
+        public bool IsPublic { get; set; } = false; // По подразбиране частен
     }
 
 
